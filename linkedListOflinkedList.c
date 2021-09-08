@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-int numVertices = 0;
+#include <limits.h>
 
 typedef struct sEdge {
 	char name[50];
@@ -33,26 +32,15 @@ void *chkMalloc (size_t sz) {
 	return mem;
 }
 
-void addVertex (tVertex **first, char *name) {
+void addVertex (tVertex **first, char *name, int *numVertices) {
 	// Insert new item at start.
 
 	tVertex *newest = chkMalloc (sizeof (*newest));
 	strcpy (newest->name, name);
 	newest->next = *first;
-	newest->id = numVertices++;
+	newest->id = (*numVertices)++;
 	*first = newest;
 }
-
-/*void addEdge (tVertex *first, char *name, int length, int dir) {*/
-/*// Insert at start of list.*/
-
-/*tEdge *newest = chkMalloc (sizeof (*newest));*/
-/*strcpy (newest->name, name);*/
-/*newest->next = first->firstEdge;*/
-/*newest->length = length;*/
-/*newest->dir = dir;*/
-/*first->firstEdge = newest;*/
-/*}*/
 
 void addVertexEdge (tVertex *first, char* name_a, char *name_b, int length_b) {
 	// Insert at start of list.
@@ -106,21 +94,22 @@ void dumpDetails (tVertex *currVertex) {
 	}
 }
 
-void primAlg (tVertex *currVertex, tVertex **minGraph) {
+void primAlg (tVertex *currVertex, tVertex **minGraph, int *numVertices) {
 	tVertex *firstVertex = currVertex;
-	int numEdge = 0, selected[numVertices], min;
+	int numEdge = 0, selected[*numVertices], min, minPointedId, minGraphVertices = 0;
+	char minVertexName[50], minPointedName[50];
 
 	memset(selected, 0, sizeof(selected));
 
-	selected[numVertices - 1] = 1;
+	selected[*numVertices - 1] = 1;
 
 	while (currVertex != NULL) {
-		addVertex (*&minGraph, currVertex->name);
+		addVertex (*&minGraph, currVertex->name, &minGraphVertices);
 		currVertex = currVertex->next;
 	}
 
-	while(numEdge < numVertices - 1) {
-		min = 999999;
+	while(numEdge < *numVertices - 1) {
+		min = INT_MAX;
 		currVertex = firstVertex;
 
 		while (currVertex != NULL) {
@@ -130,10 +119,13 @@ void primAlg (tVertex *currVertex, tVertex **minGraph) {
 					if(!selected[currEdge->id]) {
 						if (min > currEdge->length) {
 							min = currEdge->length;
-							/*y = currEdge->id;*/
 							selected[currEdge->id] = 1;
-							/*printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name, currEdge->length);*/
 							addEdge (*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
+							/*strcpy (minPointedName, currEdge->name);*/
+							/*strcpy (minVertexName, currVertex->name);*/
+							/*minPointedId = currEdge->id;*/
+							/*y = currEdge->id;*/
+							/*printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name, currEdge->length);*/
 						}
 					}
 					currEdge = currEdge->next;
@@ -141,35 +133,86 @@ void primAlg (tVertex *currVertex, tVertex **minGraph) {
 			}
 			currVertex = currVertex->next;
 		}
+		/*selected[minPointedId] = 1;*/
+		/*addEdge (*minGraph, minVertexName, minPointedName, min, 0);*/
+		numEdge++;
+	}
+	*&minGraph = minGraph;
+}
+
+void kruskalAlg (tVertex *currVertex, tVertex **minGraph, int *numVertices) {
+	tVertex *firstVertex = currVertex;
+	int numEdge = 0, selected[*numVertices], min, minGraphVertices = 0, iMin_vertex, iMin_pointed;
+	char cMin_vertex[50], cMin_pointed[50];
+
+	memset(selected, 0, sizeof(selected));
+
+	while (currVertex != NULL) {
+		addVertex (*&minGraph, currVertex->name, &minGraphVertices);
+		currVertex = currVertex->next;
+	}
+
+	while(numEdge < *numVertices - 1) {
+		min = INT_MAX;
+		currVertex = firstVertex;
+
+		while (currVertex != NULL) {
+			tEdge *currEdge = currVertex->firstEdge;
+			while (currEdge != NULL) {
+				if((selected[currVertex->id] || numEdge == 0) && !selected[currEdge->id]) {
+					if (min > currEdge->length) {
+						min = currEdge->length;
+						iMin_vertex = currVertex->id;
+						iMin_pointed = currEdge->id;
+						strcpy (cMin_vertex, currVertex->name);
+						strcpy (cMin_pointed, currEdge->name);
+					}
+				}
+				currEdge = currEdge->next;
+			}
+			currVertex = currVertex->next;
+		}
+		selected[iMin_vertex] = 1;
+		selected[iMin_pointed] = 1;
+		addEdge (*minGraph, cMin_vertex, cMin_pointed, min, 0);
 		numEdge++;
 	}
 	*&minGraph = minGraph;
 }
 
 int main (void) {
-	tVertex *firstVertex = NULL;
-	tVertex *minGraph = NULL;
+	tVertex *firstVertex = NULL, *minGraph = NULL;
+	int firstGraphVertices = 0;
 
-	addVertex (&firstVertex, "A");
-	addVertex (&firstVertex, "B");
-	addVertex (&firstVertex, "C");
-	addVertex (&firstVertex, "D");
-	addVertex (&firstVertex, "E");
-	addVertex (&firstVertex, "F");
+	addVertex (&firstVertex, "A", &firstGraphVertices);
+	addVertex (&firstVertex, "B", &firstGraphVertices);
+	addVertex (&firstVertex, "C", &firstGraphVertices);
+	addVertex (&firstVertex, "D", &firstGraphVertices);
+	addVertex (&firstVertex, "E", &firstGraphVertices);
+	addVertex (&firstVertex, "F", &firstGraphVertices);
 
-	addEdge (firstVertex, "A", "B", 4, 0);
-	addEdge (firstVertex, "A", "C", 4, 0);
-	addEdge (firstVertex, "B", "C", 2, 0);
-	addEdge (firstVertex, "C", "D", 3, 0);
-	addEdge (firstVertex, "C", "E", 2, 0);
-	addEdge (firstVertex, "C", "F", 4, 0);
-	addEdge (firstVertex, "D", "F", 3, 0);
-	addEdge (firstVertex, "E", "F", 3, 0);
+	/*addEdge (firstVertex, "A", "B", 4, 0);*/
+	/*addEdge (firstVertex, "A", "C", 4, 0);*/
+	/*addEdge (firstVertex, "B", "C", 2, 0);*/
+	/*addEdge (firstVertex, "C", "D", 3, 0);*/
+	/*addEdge (firstVertex, "C", "E", 2, 0);*/
+	/*addEdge (firstVertex, "C", "F", 4, 0);*/
+	/*addEdge (firstVertex, "D", "F", 3, 0);*/
+	/*addEdge (firstVertex, "E", "F", 3, 0);*/
 	/*addEdge (firstVertex, "A", "D", 1, 0);*/
+	addEdge (firstVertex, "A", "B", 1, 0);
+	addEdge (firstVertex, "A", "D", 4, 0);
+	addEdge (firstVertex, "A", "E", 3, 0);
+	addEdge (firstVertex, "B", "D", 4, 0);
+	addEdge (firstVertex, "D", "E", 4, 0);
+	addEdge (firstVertex, "B", "E", 2, 0);
+	addEdge (firstVertex, "E", "F", 7, 0);
+	addEdge (firstVertex, "F", "C", 5, 0);
+	addEdge (firstVertex, "C", "E", 4, 0);
 
 	dumpDetails (firstVertex);
 
-	primAlg (firstVertex, &minGraph);
+	kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);
 	printf("\n*** MINIMIZED ***\n");
 
 	dumpDetails (minGraph);
