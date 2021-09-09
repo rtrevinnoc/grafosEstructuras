@@ -52,11 +52,21 @@ void addVertexEdge(tVertex *first, char *name_a, char *name_b, int length_b) {
 		first = first->next;
 	}
 
-	strcpy(newest->name, name_b);
-	newest->next = selected->firstEdge;
-	newest->length = length_b;
-	newest->id = pointed->id;
-	selected->firstEdge = newest;
+
+	tEdge *currEdge = selected->firstEdge;
+	int i = 0;
+	while (currEdge != NULL) {
+		if (strcmp(currEdge->name, name_b) == 0) i++;
+		currEdge = currEdge->next;
+	}
+
+	if (selected->firstEdge == NULL || i == 0) {
+		strcpy(newest->name, name_b);
+		newest->next = selected->firstEdge;
+		newest->length = length_b;
+		newest->id = pointed->id;
+		selected->firstEdge = newest;
+	}
 }
 
 void addEdge(tVertex *first, char *name_a, char *name_b, int length_b,
@@ -187,9 +197,8 @@ void kruskalAlg(tVertex *currVertex, tVertex **minGraph, int *numVertices) {
 void bfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
 		int *numVertices) {
 	tVertex *firstVertex = currVertex;
-	int numEdge = 0, selected[*numVertices], min, minGraphVertices = 0,
-	    iMin_vertex, iMin_pointed;
-	char cMin_vertex[50], cMin_pointed[50], order[*numVertices][50];
+	int numEdge = 0, selected[*numVertices], minGraphVertices = 0;
+	char order[*numVertices][50];
 	struct Queue *queue = createQueue(*numVertices);
 
 	memset(selected, 0, sizeof(selected));
@@ -201,55 +210,33 @@ void bfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
 
 	while (numEdge < *numVertices) {
 		currVertex = firstVertex;
-
-		/*printf("\n#(queue)[%d]=> ", front(queue));*/
-		/*for(unsigned num1=0; num1<queue->capacity; num1++) {*/
-			/*printf("%d ", queue->array[num1]);*/
-		/*}*/
-		/*printf("\n");*/
-
-		/*printf("\n*(selected)=> ");*/
-		/*for(int num2=0; num2<*numVertices; num2++) {*/
-			/*printf("%d ", selected[num2]);*/
-		/*}*/
-		/*printf("\n");*/
-
-		/*printf("\n*(order)=> ");*/
-		/*for(int num3=0; num3<numEdge; num3++) {*/
-			/*printf("%s ", order[num3]);*/
-		/*}*/
-		/*printf("\n");*/
-
-		/*int i;*/
 		while (currVertex != NULL) {
 			tEdge *currEdge = currVertex->firstEdge;
 			while (currEdge != NULL) {
 				if (numEdge == 0 && strcmp(currVertex->name, pivot) == 0) {
 					selected[currVertex->id] = 1;
 					selected[currEdge->id] = 1;
-					printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name, currEdge->length);
 					enqueue(queue, currEdge->id);
 					strcpy(order[numEdge], currVertex->name);
+					addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
 				} else if (numEdge > 0 && front(queue) == currVertex->id) {
-					/*printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name, currEdge->length);*/
 					if (!selected[currEdge->id]) {
-						printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name, currEdge->length);
 						enqueue(queue, currEdge->id);
+						addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
 					}
-					strcpy(order[numEdge+1], currVertex->name);
+					strcpy(order[numEdge], currVertex->name);
 				}
 				currEdge = currEdge->next;
 			}
 			currVertex = currVertex->next;
 		}
 		if (numEdge > 0) dequeue(queue);
-		/*strcpy(order[numEdge], dequeue(queue));*/
 		numEdge++;
 	}
 
-	printf("\n*(order)=> ");
-	for(int num3=0; num3<numEdge+1; num3++) {
-		printf("%s", order[num3]);
+	printf("\n#(order)=> ");
+	for(int i=0; i<numEdge; i++) {
+		printf("->%s", order[i]);
 	}
 	printf("\n");
 	*&minGraph = minGraph;
@@ -290,23 +277,11 @@ int main(void) {
 
 	dumpDetails(firstVertex);
 
+	printf("\n*** MINIMIZED ***\n");
 	/*kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);*/
-	bfsAlg(firstVertex, "A", &minGraph, &firstGraphVertices);
-	/*printf("\n*** MINIMIZED ***\n");*/
+	bfsAlg(firstVertex, "D", &minGraph, &firstGraphVertices);
 
-	/*dumpDetails(minGraph);*/
-
-	/*struct Queue *queue = createQueue(1000);*/
-
-	/*enqueue(queue, 10);*/
-	/*enqueue(queue, 20);*/
-	/*enqueue(queue, 30);*/
-	/*enqueue(queue, 40);*/
-
-	/*printf("%d dequeued from queue\n\n", dequeue(queue));*/
-
-	/*printf("Front item is %d\n", front(queue));*/
-	/*printf("Rear item is %d\n", rear(queue));*/
+	dumpDetails(minGraph);
 
 	return 0;
 }
