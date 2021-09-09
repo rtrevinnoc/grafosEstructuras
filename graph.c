@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "stack.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +20,9 @@ typedef struct sVertex {
 } tVertex;
 
 void *chkMalloc(size_t sz) {
-	void *mem = malloc(sz); // Just fail immediately on error.  
-	if (mem == NULL) { printf("Out of memory! Exiting.\n");
+	void *mem = malloc(sz); // Just fail immediately on error.
+	if (mem == NULL) {
+		printf("Out of memory! Exiting.\n");
 		exit(1);
 	}
 
@@ -52,11 +54,11 @@ void addVertexEdge(tVertex *first, char *name_a, char *name_b, int length_b) {
 		first = first->next;
 	}
 
-
 	tEdge *currEdge = selected->firstEdge;
 	int i = 0;
 	while (currEdge != NULL) {
-		if (strcmp(currEdge->name, name_b) == 0) i++;
+		if (strcmp(currEdge->name, name_b) == 0)
+			i++;
 		currEdge = currEdge->next;
 	}
 
@@ -218,11 +220,13 @@ void bfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
 					selected[currEdge->id] = 1;
 					enqueue(queue, currEdge->id);
 					strcpy(order[numEdge], currVertex->name);
-					addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
+					addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length,
+							0);
 				} else if (numEdge > 0 && front(queue) == currVertex->id) {
 					if (!selected[currEdge->id]) {
 						enqueue(queue, currEdge->id);
-						addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
+						addEdge(*minGraph, currVertex->name, currEdge->name,
+								currEdge->length, 0);
 					}
 					strcpy(order[numEdge], currVertex->name);
 				}
@@ -230,15 +234,71 @@ void bfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
 			}
 			currVertex = currVertex->next;
 		}
-		if (numEdge > 0) dequeue(queue);
+		if (numEdge > 0)
+			dequeue(queue);
 		numEdge++;
 	}
 
 	printf("\n#(order)=> ");
-	for(int i=0; i<numEdge; i++) {
+	for (int i = 0; i < numEdge; i++) {
 		printf("->%s", order[i]);
 	}
 	printf("\n");
+	*&minGraph = minGraph;
+}
+
+void dfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
+		int *numVertices) {
+	tVertex *firstVertex = currVertex;
+	int numEdge = 0, selected[*numVertices], minGraphVertices = 0;
+	char order[*numVertices][50];
+	struct Stack *stack = createStack(*numVertices);
+
+	memset(selected, 0, sizeof(selected));
+
+	while (currVertex != NULL) {
+		addVertex(*&minGraph, currVertex->name, &minGraphVertices);
+		currVertex = currVertex->next;
+	}
+
+	while (numEdge < *numVertices) {
+		currVertex = firstVertex;
+
+		while (currVertex != NULL) {
+			tEdge *currEdge = currVertex->firstEdge;
+			if (numEdge == 0 && strcmp(currVertex->name, pivot) == 0) {
+				while (currEdge != NULL) {
+					addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
+					push(stack, currEdge->id);
+					strcpy(order[numEdge], currVertex->name);
+					selected[currEdge->id] = 1;
+					currEdge = currEdge->next;
+				}
+				selected[currVertex->id] = 1;
+			} else if (numEdge > 0 && top(stack) == currVertex->id) {
+				pop(stack);
+				while (currEdge != NULL) {
+					if (!selected[currEdge->id]) {
+						push(stack, currEdge->id);
+						addEdge(*minGraph, currVertex->name, currEdge->name, currEdge->length, 0);
+					}
+					currEdge = currEdge->next;
+				}
+				strcpy(order[numEdge], currVertex->name);
+				selected[currVertex->id] = 1;
+				numEdge++;
+			}
+			currVertex = currVertex->next;
+		}
+		if (numEdge == 0) numEdge++;
+	}
+
+	printf("\n#(order)=> ");
+	for (int i = 0; i < numEdge; i++) {
+		printf("->%s", order[i]);
+	}
+	printf("\n");
+
 	*&minGraph = minGraph;
 }
 
@@ -253,6 +313,9 @@ int main(void) {
 	addVertex(&firstVertex, "E", &firstGraphVertices);
 	addVertex(&firstVertex, "F", &firstGraphVertices);
 
+	addVertex(&firstVertex, "G", &firstGraphVertices);
+	addVertex(&firstVertex, "H", &firstGraphVertices);
+
 	/*addEdge (firstVertex, "A", "B", 4, 0);*/
 	/*addEdge (firstVertex, "A", "C", 4, 0);*/
 	/*addEdge (firstVertex, "B", "C", 2, 0);*/
@@ -264,24 +327,32 @@ int main(void) {
 
 	/*addEdge (firstVertex, "A", "D", 1, 0);*/
 
-	
-	addEdge(firstVertex, "A", "B", 1, 0);
-	addEdge(firstVertex, "A", "D", 4, 0);
-	addEdge(firstVertex, "A", "E", 3, 0);
-	addEdge(firstVertex, "B", "D", 4, 0);
-	addEdge(firstVertex, "D", "E", 4, 0);
-	addEdge(firstVertex, "B", "E", 2, 0);
-	addEdge(firstVertex, "E", "F", 7, 0);
-	addEdge(firstVertex, "F", "C", 5, 0);
+	/*addEdge(firstVertex, "A", "B", 1, 0);*/
+	/*addEdge(firstVertex, "A", "D", 4, 0);*/
+	/*addEdge(firstVertex, "A", "E", 3, 0);*/
+	/*addEdge(firstVertex, "B", "D", 4, 0);*/
+	/*addEdge(firstVertex, "D", "E", 4, 0);*/
+	/*addEdge(firstVertex, "B", "E", 2, 0);*/
+	/*addEdge(firstVertex, "E", "F", 7, 0);*/
+	/*addEdge(firstVertex, "F", "C", 5, 0);*/
+	/*addEdge(firstVertex, "C", "E", 4, 0);*/
+
+	addEdge(firstVertex, "A", "B", 4, 0);
+	addEdge(firstVertex, "B", "G", 4, 0);
+	addEdge(firstVertex, "B", "H", 4, 0);
+	addEdge(firstVertex, "A", "C", 4, 0);
 	addEdge(firstVertex, "C", "E", 4, 0);
+	addEdge(firstVertex, "C", "D", 4, 0);
+	addEdge(firstVertex, "C", "F", 4, 0);
+
 
 	dumpDetails(firstVertex);
 
 	printf("\n*** MINIMIZED ***\n");
 	/*kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);*/
-	bfsAlg(firstVertex, "D", &minGraph, &firstGraphVertices);
+	bfsAlg(firstVertex, "A", &minGraph, &firstGraphVertices);
 
-	dumpDetails(minGraph);
+	/*dumpDetails(minGraph);*/
 
 	return 0;
 }
