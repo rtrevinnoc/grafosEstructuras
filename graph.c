@@ -302,6 +302,73 @@ void dfsAlg(tVertex *currVertex, char *pivot, tVertex **minGraph,
 	*&minGraph = minGraph;
 }
 
+void printGraph(tVertex *currVertex, int *numVertices) {
+	int selected[*numVertices];
+	char vertices[*numVertices][50], espacios[*numVertices];
+	int x,y;
+
+	memset(selected, 0, sizeof(selected));
+	for (int i = 0; i < *numVertices; i++) {
+		espacios[i] = ' ';
+	}
+
+	while (currVertex != NULL) {
+		tEdge *currEdge = currVertex->firstEdge;
+		if (currEdge == NULL) {
+			printf("   <<nothing>>\n");
+		} else {
+			while (currEdge != NULL) {
+				if (!selected[currEdge->id]) {
+					/*printf("[%s, %s]\n", currVertex->name, currEdge->name);*/
+
+					if (currVertex->id > currEdge->id) {
+						x = currEdge->id;
+						y = currVertex->id;
+					} else {
+						x = currVertex->id;
+						y = currEdge->id;
+					}
+					/*printf("#=> x: %d\ty: %d\n", x, y);*/
+
+					for (int i = 0; i < x; i++) {
+						printf("%c ", espacios[i]);
+					}
+					printf("+");
+					for (int i = 0; i < y-x-1; i++) {
+						printf("--");
+					}
+					printf("-+ ");
+					for (int i = y+1; i < *numVertices; i++) {
+						printf("%c ", espacios[i]);
+					}
+					printf("\n");
+
+					espacios[x] = '|';
+					espacios[y] = '|';
+					
+					for (int i = 0; i < *numVertices; i++) {
+						printf("%c ", espacios[i]);
+					}
+					
+					printf("\n");
+
+				}
+				currEdge = currEdge->next;
+			}
+		}
+		strcpy(vertices[currVertex->id], currVertex->name);
+		selected[currVertex->id] = 1;
+
+
+		currVertex = currVertex->next;
+	}
+
+	for (int i = *numVertices-1; i >= 0; i--) {
+		printf("%s ", vertices[i]);
+	}
+	printf("\n");
+}
+
 int main(void) {
 	tVertex *firstVertex = NULL, *minGraph = NULL;
 	int firstGraphVertices = 0;
@@ -313,17 +380,17 @@ int main(void) {
 	addVertex(&firstVertex, "E", &firstGraphVertices);
 	addVertex(&firstVertex, "F", &firstGraphVertices);
 
-	addVertex(&firstVertex, "G", &firstGraphVertices);
-	addVertex(&firstVertex, "H", &firstGraphVertices);
+	/*addVertex(&firstVertex, "G", &firstGraphVertices);*/
+	/*addVertex(&firstVertex, "H", &firstGraphVertices);*/
 
-	/*addEdge (firstVertex, "A", "B", 4, 0);*/
-	/*addEdge (firstVertex, "A", "C", 4, 0);*/
-	/*addEdge (firstVertex, "B", "C", 2, 0);*/
-	/*addEdge (firstVertex, "C", "D", 3, 0);*/
-	/*addEdge (firstVertex, "C", "E", 2, 0);*/
-	/*addEdge (firstVertex, "C", "F", 4, 0);*/
-	/*addEdge (firstVertex, "D", "F", 3, 0);*/
-	/*addEdge (firstVertex, "E", "F", 3, 0);*/
+	addEdge (firstVertex, "A", "B", 4, 0);
+	addEdge (firstVertex, "A", "C", 4, 0);
+	addEdge (firstVertex, "B", "C", 2, 0);
+	addEdge (firstVertex, "C", "D", 3, 0);
+	addEdge (firstVertex, "C", "E", 2, 0);
+	addEdge (firstVertex, "C", "F", 4, 0);
+	addEdge (firstVertex, "D", "F", 3, 0);
+	addEdge (firstVertex, "E", "F", 3, 0);
 
 	/*addEdge (firstVertex, "A", "D", 1, 0);*/
 
@@ -337,22 +404,28 @@ int main(void) {
 	/*addEdge(firstVertex, "F", "C", 5, 0);*/
 	/*addEdge(firstVertex, "C", "E", 4, 0);*/
 
-	addEdge(firstVertex, "A", "B", 4, 0);
-	addEdge(firstVertex, "B", "G", 4, 0);
-	addEdge(firstVertex, "B", "H", 4, 0);
-	addEdge(firstVertex, "A", "C", 4, 0);
-	addEdge(firstVertex, "C", "E", 4, 0);
-	addEdge(firstVertex, "C", "D", 4, 0);
-	addEdge(firstVertex, "C", "F", 4, 0);
+	/*addEdge(firstVertex, "A", "B", 4, 0);*/
+	/*addEdge(firstVertex, "B", "G", 4, 0);*/
+	/*addEdge(firstVertex, "B", "H", 4, 0);*/
+	/*addEdge(firstVertex, "A", "C", 4, 0);*/
+	/*addEdge(firstVertex, "C", "E", 4, 0);*/
+	/*addEdge(firstVertex, "C", "D", 4, 0);*/
+	/*addEdge(firstVertex, "C", "F", 4, 0);*/
 
 
-	dumpDetails(firstVertex);
+	/*addEdge(firstVertex, "A", "B", 4, 0);*/
+	/*addEdge(firstVertex, "C", "A", 4, 0);*/
 
-	printf("\n*** MINIMIZED ***\n");
+
+	/*dumpDetails(firstVertex);*/
+
+	/*printf("\n*** MINIMIZED ***\n");*/
 	/*kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);*/
-	bfsAlg(firstVertex, "A", &minGraph, &firstGraphVertices);
+	/*bfsAlg(firstVertex, "A", &minGraph, &firstGraphVertices);*/
 
 	/*dumpDetails(minGraph);*/
+
+	printGraph(firstVertex, &firstGraphVertices);
 
 	return 0;
 }
