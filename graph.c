@@ -84,7 +84,7 @@ void addEdge(tVertex *first, char *name_a, char *name_b, int length_b,
 	}
 }
 
-void delEdge(tEdge **first, char *name) {
+void delVertexEdge(tEdge **first, char *name) {
 	tEdge *cur = *first, *prev = NULL;
 	while (cur != NULL && strcmp(cur->name, name) != 0) {
 		prev = cur;
@@ -118,7 +118,20 @@ void delVertex(tVertex **first, char *name) {
 
 	cur = *first;
 	while (cur != NULL) {
-		delEdge(&(cur->firstEdge), name);
+		delVertexEdge(&(cur->firstEdge), name);
+		cur = cur->next;
+	}
+}
+
+void delEdge(tVertex **first, char *name_a, char *name_b) {
+	tVertex *cur = *first;
+	while (cur != NULL) {
+		if (strcmp(cur->name, name_a) == 0) {
+			delVertexEdge(&(cur->firstEdge), name_b);
+		}
+		if (strcmp(cur->name, name_b) == 0) {
+			delVertexEdge(&(cur->firstEdge), name_a);
+		}
 		cur = cur->next;
 	}
 }
@@ -444,11 +457,12 @@ void instrucciones() {
 			"   \t\t 1 insertar vertice\n"
 			"   \t\t 2 conectar vertices\n"
 			"   \t\t 3 eliminar vertice\n"
-			"   \t\t 4 imprimir grafo\n"
-			"   \t\t 5 ejecutar algoritmo de Prim\n"
-			"   \t\t 6 ejecutar algoritmo de Kruskal\n"
-			"   \t\t 7 Busqueda por profundidad\n"
-			"   \t\t 8 Busqueda por amplitud\n"
+			"   \t\t 4 eliminar conexion\n"
+			"   \t\t 5 imprimir grafo\n"
+			"   \t\t 6 ejecutar algoritmo de Prim\n"
+			"   \t\t 7 ejecutar algoritmo de Kruskal\n"
+			"   \t\t 8 Busqueda por profundidad\n"
+			"   \t\t 9 Busqueda por amplitud\n"
 			"   \t\t 0 salir\n");
 }
 
@@ -557,27 +571,41 @@ int main(void) {
 
 				break;
 			case 4:
+				printf("\n*** Elimina conexion ***\n");
+
+				printf("Nombre del primer nodo -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+
+				printf("Nombre del segundo nodo -> ");
+				fgets(nombre_b, 50, stdin);
+				nombre_b[strcspn(nombre_b, "\n")] = 0;
+
+				delEdge(&firstVertex, nombre, nombre_b);
+
+				break;
+			case 5:
 				printf("\n*** Imprime grafo ***\n");
 
 				dumpDetails(firstVertex);
 				printGraph(firstVertex, &firstGraphVertices);
 
 				break;
-			case 5:
+			case 6:
 				printf("\n*** Ejecutar algoritmo de Prim ***\n");
 				primAlg (firstVertex, &minGraph, &firstGraphVertices);
 				dumpDetails(minGraph);
 				printGraph(minGraph, &firstGraphVertices);
 
 				break;
-			case 6:
+			case 7:
 				printf("\n*** Ejecutar algoritmo de Kruskal ***\n");
 				kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);
 				dumpDetails(minGraph);
 				printGraph(minGraph, &firstGraphVertices);
 
 				break;
-			case 7:
+			case 8:
 				printf("\n*** Busqueda por profundidad ***\n");
 
 				printf("Nombre del pivote -> ");
@@ -588,7 +616,7 @@ int main(void) {
 				dumpDetails(minGraph);
 
 				break;
-			case 8:
+			case 9:
 				printf("\n*** Busqueda por amplitud ***\n");
 
 				printf("Nombre del pivote -> ");
