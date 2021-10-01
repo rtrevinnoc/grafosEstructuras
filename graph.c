@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct sEdge {
 	char name[50];
@@ -83,6 +84,45 @@ void addEdge(tVertex *first, char *name_a, char *name_b, int length_b,
 	}
 }
 
+void delEdge(tEdge **first, char *name) {
+	tEdge *cur = *first, *prev = NULL;
+	while (cur != NULL && strcmp(cur->name, name) != 0) {
+		prev = cur;
+		cur = cur->next;
+	}
+
+	if (cur) {
+		if (prev) {
+			/*printf("$(1)=> %s\n", prev->name);*/
+			/*printf("#(1)=> %s\n", cur->name);*/
+			prev->next = cur->next;
+		} else {
+			/*printf("$(2)=> %s\n", prev->name);*/
+			/*printf("#(2)=> %s\n", cur->name);*/
+			*first = cur->next;
+		}
+	}
+}
+
+void delVertex(tVertex **first, char *name) {
+	tVertex *cur = *first, *prev = NULL;
+	while (cur != NULL && strcmp(cur->name, name) != 0) {
+		prev = cur;
+		cur = cur->next;
+	}
+	if (prev) {
+		prev->next = cur->next;
+	} else {
+		*first = cur->next;
+	}
+
+	cur = *first;
+	while (cur != NULL) {
+		delEdge(&(cur->firstEdge), name);
+		cur = cur->next;
+	}
+}
+
 void dumpDetails(tVertex *currVertex) {
 	// For every child.
 
@@ -92,9 +132,7 @@ void dumpDetails(tVertex *currVertex) {
 		// For every toy that child has.
 
 		tEdge *currEdge = currVertex->firstEdge;
-		if (currEdge == NULL) {
-			printf("   <<nothing>>\n");
-		} else {
+		if (currEdge != NULL) {
 			while (currEdge != NULL) {
 				printf("   [%s(%lu), %d]\n", currEdge->name, currEdge->id,
 						currEdge->length);
@@ -314,9 +352,7 @@ void printGraph(tVertex *currVertex, int *numVertices) {
 
 	while (currVertex != NULL) {
 		tEdge *currEdge = currVertex->firstEdge;
-		if (currEdge == NULL) {
-			printf("   <<nothing>>\n");
-		} else {
+		if (currEdge != NULL) {
 			while (currEdge != NULL) {
 				if (!selected[currEdge->id]) {
 					/*printf("[%s, %s]\n", currVertex->name, currEdge->name);*/
@@ -363,34 +399,81 @@ void printGraph(tVertex *currVertex, int *numVertices) {
 		currVertex = currVertex->next;
 	}
 
-	for (int i = *numVertices-1; i >= 0; i--) {
-		printf("%s ", vertices[i]);
+	for (int i = 0; i < *numVertices; i++) {
+		if (selected[i]) {
+			printf("%s ", vertices[i]);
+		} else {
+			printf("  ");
+		}
 	}
 	printf("\n");
 }
 
+void getNumero(int entero, void *input) {
+	int length, i = 0;
+	char aux[' '];
+	
+	do {
+		fgets(aux, ' ', stdin);
+		aux[strcspn(aux, "\n")] = 0;
+		length = strlen(aux);
+		if (length != 0) {
+			for (i = 0; i < length; ++i) {
+				if ((!isdigit(aux[i]) && aux[i] != '.') || (i == 0 && aux[i] == '-')) {
+					printf("Introduzca correctamente el dato -> ");
+					break;
+				}
+			}
+		} else {
+			i = length;
+		}
+	} while (i != length);
+
+	if (entero == 0) {
+		*(float*)input = atof(aux);
+	} else if (entero == 2) {
+		*(long*)input = atol(aux);
+	} else {
+		*(int*)input = atoi(aux);
+	}
+}
+
+void instrucciones() {
+	printf("\n\t\t ### GRAFOS ### \n");
+	printf("\n\t\t\t ¿Qué opcion desea? :\n"
+			"   \t\t 1 insertar vertice\n"
+			"   \t\t 2 conectar vertices\n"
+			"   \t\t 3 eliminar vertice\n"
+			"   \t\t 4 imprimir grafo\n"
+			"   \t\t 5 ejecutar algoritmo de Prim\n"
+			"   \t\t 6 ejecutar algoritmo de Kruskal\n"
+			"   \t\t 7 Busqueda por profundidad\n"
+			"   \t\t 8 Busqueda por amplitud\n"
+			"   \t\t 0 salir\n");
+}
+
 int main(void) {
-	tVertex *firstVertex = NULL, *minGraph = NULL;
+	tVertex *firstVertex = NULL;
 	int firstGraphVertices = 0;
 
 	addVertex(&firstVertex, "A", &firstGraphVertices);
 	addVertex(&firstVertex, "B", &firstGraphVertices);
 	addVertex(&firstVertex, "C", &firstGraphVertices);
-	addVertex(&firstVertex, "D", &firstGraphVertices);
-	addVertex(&firstVertex, "E", &firstGraphVertices);
-	addVertex(&firstVertex, "F", &firstGraphVertices);
+	/*addVertex(&firstVertex, "D", &firstGraphVertices);*/
+	/*addVertex(&firstVertex, "E", &firstGraphVertices);*/
+	/*addVertex(&firstVertex, "F", &firstGraphVertices);*/
 
 	/*addVertex(&firstVertex, "G", &firstGraphVertices);*/
 	/*addVertex(&firstVertex, "H", &firstGraphVertices);*/
 
-	addEdge (firstVertex, "A", "B", 4, 0);
-	addEdge (firstVertex, "A", "C", 4, 0);
-	addEdge (firstVertex, "B", "C", 2, 0);
-	addEdge (firstVertex, "C", "D", 3, 0);
-	addEdge (firstVertex, "C", "E", 2, 0);
-	addEdge (firstVertex, "C", "F", 4, 0);
-	addEdge (firstVertex, "D", "F", 3, 0);
-	addEdge (firstVertex, "E", "F", 3, 0);
+	/*addEdge (firstVertex, "A", "B", 4, 0);*/
+	/*addEdge (firstVertex, "A", "C", 4, 0);*/
+	/*addEdge (firstVertex, "B", "C", 2, 0);*/
+	/*addEdge (firstVertex, "C", "D", 3, 0);*/
+	/*addEdge (firstVertex, "C", "E", 2, 0);*/
+	/*addEdge (firstVertex, "C", "F", 4, 0);*/
+	/*addEdge (firstVertex, "D", "F", 3, 0);*/
+	/*addEdge (firstVertex, "E", "F", 3, 0);*/
 
 	/*addEdge (firstVertex, "A", "D", 1, 0);*/
 
@@ -413,8 +496,8 @@ int main(void) {
 	/*addEdge(firstVertex, "C", "F", 4, 0);*/
 
 
-	/*addEdge(firstVertex, "A", "B", 4, 0);*/
-	/*addEdge(firstVertex, "C", "A", 4, 0);*/
+	addEdge(firstVertex, "A", "B", 4, 0);
+	addEdge(firstVertex, "C", "A", 4, 0);
 
 
 	/*dumpDetails(firstVertex);*/
@@ -425,7 +508,99 @@ int main(void) {
 
 	/*dumpDetails(minGraph);*/
 
-	printGraph(firstVertex, &firstGraphVertices);
+	/*printGraph(firstVertex, &firstGraphVertices);*/
+
+	int op, peso;
+	char nombre[50], nombre_b[50];
+
+	do {
+	
+		tVertex *minGraph = NULL;
+
+		instrucciones();
+		printf("\nOpción -> ");
+		getNumero(1, &op);
+		switch (op) {
+			case 1:
+				printf("\n*** Inserta un vertice ***\n");
+
+				printf("Nombre -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+
+				addVertex(&firstVertex, nombre, &firstGraphVertices);
+				break;
+			case 2:
+				printf("\n*** Conecta dos vertices ***\n");
+
+				printf("Nombre del primer nodo -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+
+				printf("Nombre del segundo nodo -> ");
+				fgets(nombre_b, 50, stdin);
+				nombre_b[strcspn(nombre_b, "\n")] = 0;
+
+				printf("Inserte peso del enlace -> ");
+				getNumero(1, &peso);
+
+				addEdge(firstVertex, nombre, nombre_b, peso, 0);
+				break;
+			case 3:
+				printf("\n*** Elimina un vertice ***\n");
+
+				printf("Nombre del primer nodo -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+
+				delVertex(&firstVertex, nombre);
+
+				break;
+			case 4:
+				printf("\n*** Imprime grafo ***\n");
+
+				dumpDetails(firstVertex);
+				printGraph(firstVertex, &firstGraphVertices);
+
+				break;
+			case 5:
+				printf("\n*** Ejecutar algoritmo de Prim ***\n");
+				primAlg (firstVertex, &minGraph, &firstGraphVertices);
+				dumpDetails(minGraph);
+				printGraph(minGraph, &firstGraphVertices);
+
+				break;
+			case 6:
+				printf("\n*** Ejecutar algoritmo de Kruskal ***\n");
+				kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);
+				dumpDetails(minGraph);
+				printGraph(minGraph, &firstGraphVertices);
+
+				break;
+			case 7:
+				printf("\n*** Busqueda por profundidad ***\n");
+
+				printf("Nombre del pivote -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+				
+				bfsAlg(firstVertex, nombre, &minGraph, &firstGraphVertices);
+				dumpDetails(minGraph);
+
+				break;
+			case 8:
+				printf("\n*** Busqueda por amplitud ***\n");
+
+				printf("Nombre del pivote -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+				
+				bfsAlg(firstVertex, nombre, &minGraph, &firstGraphVertices);
+				dumpDetails(minGraph);
+
+				break;
+		}
+	} while (op != 0);
 
 	return 0;
 }
