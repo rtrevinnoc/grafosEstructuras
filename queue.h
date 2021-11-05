@@ -12,7 +12,7 @@ struct Queue *createQueue(unsigned capacity);
 
 // int isFull(struct Queue *queue);
 
-// int isEmpty(struct Queue *queue);
+ int isQueueEmpty(struct Queue *queue);
 
 void enqueue(struct Queue *queue, int item);
 

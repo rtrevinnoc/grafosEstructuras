@@ -21,20 +21,15 @@ typedef struct sVertex {
 } tVertex;
 
 void *chkMalloc(size_t sz) {
-	void *mem = malloc(sz); // Just fail immediately on error.
+	void *mem = malloc(sz);
 	if (mem == NULL) {
-		printf("Out of memory! Exiting.\n");
+		printf("Sin memoria\n");
 		exit(1);
 	}
-
-	// Otherwise we know it worked.
-
 	return mem;
 }
 
 void addVertex(tVertex **first, char *name, int *numVertices) {
-	// Insert new item at start.
-
 	tVertex *newest = chkMalloc(sizeof(*newest));
 	strcpy(newest->name, name);
 	newest->next = *first;
@@ -43,7 +38,6 @@ void addVertex(tVertex **first, char *name, int *numVertices) {
 }
 
 void addVertexEdge(tVertex *first, char *name_a, char *name_b, int length_b) {
-	// Insert at start of list.
 	tVertex *selected, *pointed;
 	tEdge *newest = chkMalloc(sizeof(*newest));
 	while (first != NULL) {
@@ -93,12 +87,8 @@ void delVertexEdge(tEdge **first, char *name) {
 
 	if (cur) {
 		if (prev) {
-			/*printf("$(1)=> %s\n", prev->name);*/
-			/*printf("#(1)=> %s\n", cur->name);*/
 			prev->next = cur->next;
 		} else {
-			/*printf("$(2)=> %s\n", prev->name);*/
-			/*printf("#(2)=> %s\n", cur->name);*/
 			*first = cur->next;
 		}
 	}
@@ -137,12 +127,8 @@ void delEdge(tVertex **first, char *name_a, char *name_b) {
 }
 
 void dumpDetails(tVertex *currVertex) {
-	// For every child.
-
 	while (currVertex != NULL) {
 		printf("%s(%lu) has:\n", currVertex->name, currVertex->id);
-
-		// For every toy that child has.
 
 		tEdge *currEdge = currVertex->firstEdge;
 		if (currEdge != NULL) {
@@ -185,12 +171,6 @@ void primAlg(tVertex *currVertex, tVertex **minGraph, int *numVertices) {
 							selected[currEdge->id] = 1;
 							addEdge(*minGraph, currVertex->name, currEdge->name,
 									currEdge->length, 0);
-							/*strcpy (minPointedName, currEdge->name);*/
-							/*strcpy (minVertexName, currVertex->name);*/
-							/*minPointedId = currEdge->id;*/
-							/*y = currEdge->id;*/
-							/*printf("[%s] - [%s] : %d\n", currVertex-> name, currEdge->name,
-							 * currEdge->length);*/
 						}
 					}
 					currEdge = currEdge->next;
@@ -198,8 +178,6 @@ void primAlg(tVertex *currVertex, tVertex **minGraph, int *numVertices) {
 			}
 			currVertex = currVertex->next;
 		}
-		/*selected[minPointedId] = 1;*/
-		/*addEdge (*minGraph, minVertexName, minPointedName, min, 0);*/
 		numEdge++;
 	}
 	*&minGraph = minGraph;
@@ -394,11 +372,11 @@ void printGraph(tVertex *currVertex, int *numVertices) {
 
 					espacios[x] = '|';
 					espacios[y] = '|';
-					
+
 					for (int i = 0; i < *numVertices; i++) {
 						printf("%c ", espacios[i]);
 					}
-					
+
 					printf("\n");
 
 				}
@@ -411,13 +389,82 @@ void printGraph(tVertex *currVertex, int *numVertices) {
 
 		currVertex = currVertex->next;
 	}
+	printf("\n");
 
 	for (int i = 0; i < *numVertices; i++) {
 		if (selected[i]) {
-			printf("%s ", vertices[i]);
+			printf("%d ", i);
 		} else {
 			printf("  ");
 		}
+	}
+	printf("\n\n");
+
+	for (int i = 0; i < *numVertices; i++) {
+		if (selected[i]) {
+			printf("(%d) %s\n", i, vertices[i]);
+		}
+	}
+	printf("\n");
+}
+
+void printPath(int parent[], int j, char nombres[][50]) {
+	// Base Case : If j is source
+	if (parent[j] == -1) {
+		printf("->(%s)", nombres[j]);
+		return;
+	}
+
+	printPath(parent, parent[j], nombres);
+
+	printf("->(%s)", nombres[j]);
+}
+
+void dijkstraAlg(tVertex *currVertex, char *pivot, int *numVertices) {
+	tVertex *firstVertex = currVertex;
+	int numEdge = 0, distances[*numVertices], selected[*numVertices], caminos[*numVertices];
+	char nombres[*numVertices][50];
+
+	memset(selected, 0, sizeof(selected));
+	for (int i = 0; i < *numVertices; i++) {
+		distances[i] = INT_MAX;
+		caminos[i] = -1;
+	}
+
+	while (currVertex != NULL) {
+		if (strcmp(currVertex->name, pivot) == 0) {
+			distances[currVertex->id] = 0;
+			selected[currVertex->id] = 1;
+		}
+		strcpy(nombres[currVertex->id], currVertex->name);
+		currVertex = currVertex->next;
+	}
+
+	while (numEdge < *numVertices) {
+		currVertex = firstVertex;
+		while (currVertex != NULL) {
+			if (selected[currVertex->id]) {
+				tEdge *currEdge = currVertex->firstEdge;
+				while (currEdge != NULL) {
+					if (distances[currEdge->id] > currEdge->length && !selected[currEdge->id]) {
+						distances[currEdge->id] = distances[currVertex->id] + currEdge->length;
+						caminos[currEdge->id] = currVertex->id;
+					}
+					/*printf("%s - %s (%d)\n", currVertex->name, currEdge->name, currEdge->length);*/
+					selected[currEdge->id] = 1;
+					currEdge = currEdge->next;
+				}
+			}
+			currVertex = currVertex->next;
+		}
+		numEdge++;
+	}
+
+	printf("\nCaminos más cortos\n");
+	for (int i = 1; i < *numVertices; i++) {
+		printf("[");
+		printPath(caminos, i, nombres);
+		printf("]: -> %d\n", distances[i]);
 	}
 	printf("\n");
 }
@@ -425,7 +472,7 @@ void printGraph(tVertex *currVertex, int *numVertices) {
 void getNumero(int entero, void *input) {
 	int length, i = 0;
 	char aux[' '];
-	
+
 	do {
 		fgets(aux, ' ', stdin);
 		aux[strcspn(aux, "\n")] = 0;
@@ -463,6 +510,7 @@ void instrucciones() {
 			"   \t\t 7 ejecutar algoritmo de Kruskal\n"
 			"   \t\t 8 Busqueda por profundidad\n"
 			"   \t\t 9 Busqueda por amplitud\n"
+			"   \t\t 10 Encontrar caminos mas cortos\n"
 			"   \t\t 0 salir\n");
 }
 
@@ -470,65 +518,68 @@ int main(void) {
 	tVertex *firstVertex = NULL;
 	int firstGraphVertices = 0;
 
-	addVertex(&firstVertex, "A", &firstGraphVertices);
-	addVertex(&firstVertex, "B", &firstGraphVertices);
-	addVertex(&firstVertex, "C", &firstGraphVertices);
+	// ############# PIA #############
+	addVertex(&firstVertex, "Tacos Chava", &firstGraphVertices);
+	addVertex(&firstVertex, "Felipe Carrillo Puerto", &firstGraphVertices);
+	addVertex(&firstVertex, "Nexxus", &firstGraphVertices);
+	addVertex(&firstVertex, "San Genaro", &firstGraphVertices);
+	addVertex(&firstVertex, "Celestino Gasca", &firstGraphVertices);
+	addVertex(&firstVertex, "Ricardo Flores Magon", &firstGraphVertices);
+	addVertex(&firstVertex, "Sector Jardines", &firstGraphVertices);
+	addVertex(&firstVertex, "Infonavit Monterreal", &firstGraphVertices);
+	addVertex(&firstVertex, "Privadas El Sauce", &firstGraphVertices);
+	addVertex(&firstVertex, "La Loma", &firstGraphVertices);
+
+	addEdge(firstVertex, "Tacos Chava", "Infonavit Monterreal", 1800, 0);
+	addEdge(firstVertex, "Tacos Chava", "Nexxus", 3100, 0);
+	addEdge(firstVertex, "Tacos Chava", "Ricardo Flores Magon", 3400, 0);
+	addEdge(firstVertex, "Tacos Chava", "Privadas del Sauce", 4100, 0);
+	addEdge(firstVertex, "Tacos Chava", "Felipe Carrillo", 3100, 0);
+	addEdge(firstVertex, "Tacos Chava", "La Loma", 2000, 0);
+
+	addEdge(firstVertex, "Ricardo Flores Magon", "Infonavit Monterreal", 1600, 0);
+	addEdge(firstVertex, "Ricardo Flores Magon", "Sector Jardines", 1600, 0);
+
+	addEdge(firstVertex, "Felipe Carrillo Puerto", "Celestino Gasca", 1400, 0);
+	addEdge(firstVertex, "Felipe Carrillo Puerto", "Nexxus", 2800, 0);
+	addEdge(firstVertex, "Felipe Carrillo Puerto", "San Genaro", 4700, 0);
+
+	addEdge(firstVertex, "Privadas El Sauce", "Ricardo Flores Magon", 4400, 0);
+
+	addEdge(firstVertex, "Infonavit Monterreal", "Felipe Carrillo Puerto", 2000, 0);
+
+	addEdge(firstVertex, "Nexxus", "Celestino Gasca", 1500, 0);
+
+	addEdge(firstVertex, "Celestino Gasca", "San Genaro", 4600, 0);
+
+
+	//################# EJEMPLO ################
+	/*addVertex(&firstVertex, "A", &firstGraphVertices);*/
+	/*addVertex(&firstVertex, "B", &firstGraphVertices);*/
+	/*addVertex(&firstVertex, "C", &firstGraphVertices);*/
 	/*addVertex(&firstVertex, "D", &firstGraphVertices);*/
 	/*addVertex(&firstVertex, "E", &firstGraphVertices);*/
 	/*addVertex(&firstVertex, "F", &firstGraphVertices);*/
-
-	/*addVertex(&firstVertex, "G", &firstGraphVertices);*/
-	/*addVertex(&firstVertex, "H", &firstGraphVertices);*/
 
 	/*addEdge (firstVertex, "A", "B", 4, 0);*/
 	/*addEdge (firstVertex, "A", "C", 4, 0);*/
 	/*addEdge (firstVertex, "B", "C", 2, 0);*/
 	/*addEdge (firstVertex, "C", "D", 3, 0);*/
-	/*addEdge (firstVertex, "C", "E", 2, 0);*/
-	/*addEdge (firstVertex, "C", "F", 4, 0);*/
-	/*addEdge (firstVertex, "D", "F", 3, 0);*/
+	/*addEdge (firstVertex, "C", "E", 1, 0);*/
+	/*addEdge (firstVertex, "C", "F", 6, 0);*/
+	/*addEdge (firstVertex, "D", "F", 2, 0);*/
 	/*addEdge (firstVertex, "E", "F", 3, 0);*/
 
-	/*addEdge (firstVertex, "A", "D", 1, 0);*/
-
-	/*addEdge(firstVertex, "A", "B", 1, 0);*/
-	/*addEdge(firstVertex, "A", "D", 4, 0);*/
-	/*addEdge(firstVertex, "A", "E", 3, 0);*/
-	/*addEdge(firstVertex, "B", "D", 4, 0);*/
-	/*addEdge(firstVertex, "D", "E", 4, 0);*/
-	/*addEdge(firstVertex, "B", "E", 2, 0);*/
-	/*addEdge(firstVertex, "E", "F", 7, 0);*/
-	/*addEdge(firstVertex, "F", "C", 5, 0);*/
-	/*addEdge(firstVertex, "C", "E", 4, 0);*/
-
-	/*addEdge(firstVertex, "A", "B", 4, 0);*/
-	/*addEdge(firstVertex, "B", "G", 4, 0);*/
-	/*addEdge(firstVertex, "B", "H", 4, 0);*/
-	/*addEdge(firstVertex, "A", "C", 4, 0);*/
-	/*addEdge(firstVertex, "C", "E", 4, 0);*/
-	/*addEdge(firstVertex, "C", "D", 4, 0);*/
-	/*addEdge(firstVertex, "C", "F", 4, 0);*/
-
-
-	addEdge(firstVertex, "A", "B", 4, 0);
-	addEdge(firstVertex, "C", "A", 4, 0);
-
-
-	/*dumpDetails(firstVertex);*/
-
-	/*printf("\n*** MINIMIZED ***\n");*/
-	/*kruskalAlg (firstVertex, &minGraph, &firstGraphVertices);*/
-	/*bfsAlg(firstVertex, "A", &minGraph, &firstGraphVertices);*/
-
-	/*dumpDetails(minGraph);*/
-
 	/*printGraph(firstVertex, &firstGraphVertices);*/
+	/*dijkstraAlg(firstVertex, "Tacos Chava", &firstGraphVertices);*/
+	/*dijkstraAlg(firstVertex, "A", &firstGraphVertices);*/
+	/*exit(1);*/
 
 	int op, peso;
 	char nombre[50], nombre_b[50];
 
 	do {
-	
+
 		tVertex *minGraph = NULL;
 
 		instrucciones();
@@ -611,7 +662,7 @@ int main(void) {
 				printf("Nombre del pivote -> ");
 				fgets(nombre, 50, stdin);
 				nombre[strcspn(nombre, "\n")] = 0;
-				
+
 				bfsAlg(firstVertex, nombre, &minGraph, &firstGraphVertices);
 				dumpDetails(minGraph);
 
@@ -622,9 +673,19 @@ int main(void) {
 				printf("Nombre del pivote -> ");
 				fgets(nombre, 50, stdin);
 				nombre[strcspn(nombre, "\n")] = 0;
-				
+
 				bfsAlg(firstVertex, nombre, &minGraph, &firstGraphVertices);
 				dumpDetails(minGraph);
+
+				break;
+			case 10:
+				printf("\n*** Encontrar caminos mas cortos ***\n");
+
+				printf("Nombre del pivote -> ");
+				fgets(nombre, 50, stdin);
+				nombre[strcspn(nombre, "\n")] = 0;
+
+				dijkstraAlg(firstVertex, nombre, &firstGraphVertices);
 
 				break;
 		}
