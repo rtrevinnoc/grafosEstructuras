@@ -1,18 +1,16 @@
 #ifndef QUEUE_H_ /* Include guard */
 #define QUEUE_H_
 
-// A structure to represent a queue
+// Struct con un array que representa una cola
 struct Queue {
-  int front, rear, size;
-  unsigned capacity;
-  int *array;
+  int front, rear, size; // enteros para el indice del frente, el final y el tamaño de la cola
+  unsigned capacity; // entero con el tamaño de la cola
+  int *array; // array que representa la cola
 };
 
 struct Queue *createQueue(unsigned capacity);
 
-// int isFull(struct Queue *queue);
-
- int isQueueEmpty(struct Queue *queue);
+ int colaVacia(struct Queue *queue);
 
 void enqueue(struct Queue *queue, int item);
 

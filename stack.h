@@ -1,18 +1,14 @@
 #ifndef STACK_H_ /* Include guard */
 #define STACK_H_
 
-// A structure to represent a queue
+// Struct que representa una pila
 struct Stack {
-  int top;
-  unsigned capacity;
-  int *array;
+  int top; // Cima de la pila
+  unsigned capacity; // Capacidad de la pila
+  int *array; // Puntero a lista que simula una pila
 };
 
 struct Stack *createStack(unsigned capacity);
-
-// int isFull(struct Stack* stack);
-
-// int isEmpty(struct Stack* stack);
 
 void push(struct Stack *stack, int item);
 
