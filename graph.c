@@ -478,6 +478,77 @@ void dijkstraAlg(tVertex *currVertex, char *pivot, int *numVertices) {
 	printf("\n");
 }
 
+// Imprimir representacion ASCII del grafo
+void coloringAlg(tVertex *currVertex, int *numVertices) {
+	int selected[*numVertices], available[*numVertices]; // Lista de vertices visitados
+	char nombres[*numVertices][50];
+	// printf("%d", *numVertices);
+	selected[currVertex->id] = 0;
+	strcpy(nombres[currVertex->id], currVertex->name);
+
+	for (int i = (currVertex->id - 1); i >= 0; i--) {
+		// printf("-> %d\n", i);
+		selected[i] = -1; // agregar un espacio por cada vertice en el grafo
+	}
+
+	// for(int x = 0; x < *numVertices; x++) {
+	// 	printf("%d ", selected[x]);
+	// }
+	// printf("\n");
+
+	memset(available, 0, sizeof(available)); // marcar todos los vertices como no visitados
+
+	// for(int x = 0; x < *numVertices; x++) {
+	// 	printf("%d ", available[x]);
+	// }
+	// printf("\n");
+	
+	tVertex *tmpVertex = currVertex->next; // Comenzar en el segundo vertice
+	// printf("%d", tmpVertex->id);
+	while (tmpVertex != NULL) { // Recorrer lista de vertices
+		tEdge *firstEdge = tmpVertex->firstEdge; // Comenzar en la primer arista
+		strcpy(nombres[tmpVertex->id], tmpVertex->name);
+		// printf("%s, ", tmpVertex->name);
+		// printf("\n");
+
+		tEdge *currEdge = firstEdge; // Comenzar en la primer arista
+		if (currEdge != NULL) { // Si hay aristas
+			while (currEdge != NULL) { // Recorrer lista de aristas
+				// printf("%s, ", currEdge->name);
+				if (selected[currEdge->id] != -1) {
+					available[selected[currEdge->id]] = 1;
+				}
+
+				currEdge = currEdge->next; // Pasar a la siguiente arista
+			}
+		}
+
+		int cr;
+		for (cr = 0; cr < *numVertices; cr++) {
+			if (available[cr] == 0) break;
+		}
+
+		selected[tmpVertex->id] = cr;
+
+		currEdge = firstEdge;
+		if (currEdge != NULL) { // Si hay aristas
+			while (currEdge != NULL) { // Recorrer lista de aristas
+				if (selected[currEdge->id] != -1) {
+					available[selected[currEdge->id]] = 0;
+				}
+
+				currEdge = currEdge->next; // Pasar a la siguiente arista
+			}
+		}
+
+		tmpVertex = tmpVertex->next; // Pasar al siguiente vertice
+	}
+
+	for (int i = 0; i < *numVertices; i++) { // por cada vertice
+		printf("Vertice [%s](%d) - color %d\n", nombres[i], i, selected[i]); // Imprimir la leyenda que relaciona su indice con su nombre legible a humanos (el campo name)
+	}
+}
+
 // Leer un numero de entrada estandar y guardarlo en la variable del puntero
 // input, con un tipo segun el primer argumento
 void getNumero(int entero, void *input) {
@@ -541,12 +612,47 @@ int main(void) {
 	tVertex *firstVertex = NULL;
 	int firstGraphVertices = 0;
 
+	tVertex *secondVertex = NULL;
+	int secondGraphVertices = 0;
+
 	int op, peso;
 	char nombre[50], nombre_b[50];
 
 	do {
 
 		tVertex *minGraph = NULL;
+
+		addVertex(&firstVertex, "A", &firstGraphVertices);
+		addVertex(&firstVertex, "B", &firstGraphVertices);
+		addVertex(&firstVertex, "C", &firstGraphVertices);
+		addVertex(&firstVertex, "D", &firstGraphVertices);
+		addVertex(&firstVertex, "E", &firstGraphVertices);
+
+		addEdge(firstVertex, "A", "B", 1, 0);
+		addEdge(firstVertex, "A", "C", 1, 0);
+		addEdge(firstVertex, "B", "C", 1, 0);
+		addEdge(firstVertex, "B", "D", 1, 0);
+		addEdge(firstVertex, "C", "D", 1, 0);
+		addEdge(firstVertex, "D", "E", 1, 0);
+
+		coloringAlg(firstVertex, &firstGraphVertices);
+
+		printf("\n\n\nSECOND\n\n");
+
+		addVertex(&secondVertex, "A", &secondGraphVertices);
+		addVertex(&secondVertex, "B", &secondGraphVertices);
+		addVertex(&secondVertex, "C", &secondGraphVertices);
+		addVertex(&secondVertex, "D", &secondGraphVertices);
+		addVertex(&secondVertex, "E", &secondGraphVertices);
+
+		addEdge(secondVertex, "A", "B", 1, 0);
+		addEdge(secondVertex, "A", "C", 1, 0);
+		addEdge(secondVertex, "B", "C", 1, 0);
+		addEdge(secondVertex, "B", "E", 1, 0);
+		addEdge(secondVertex, "C", "E", 1, 0);
+		addEdge(secondVertex, "E", "D", 1, 0);
+
+		coloringAlg(secondVertex, &secondGraphVertices);
 
 		instrucciones();
 		printf("\nOpción -> ");
