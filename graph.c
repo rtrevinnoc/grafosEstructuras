@@ -605,15 +605,13 @@ void instrucciones() {
 			"   \t\t 8 Busqueda por profundidad\n"
 			"   \t\t 9 Busqueda por amplitud\n"
 			"   \t\t 10 Encontrar caminos mas cortos\n"
+			"   \t\t 11 Colorear grafo\n"
 			"   \t\t 0 salir\n");
 }
 
 int main(void) {
 	tVertex *firstVertex = NULL;
 	int firstGraphVertices = 0;
-
-	tVertex *secondVertex = NULL;
-	int secondGraphVertices = 0;
 
 	int op, peso;
 	char nombre[50], nombre_b[50];
@@ -622,37 +620,37 @@ int main(void) {
 
 		tVertex *minGraph = NULL;
 
-		addVertex(&firstVertex, "A", &firstGraphVertices);
-		addVertex(&firstVertex, "B", &firstGraphVertices);
-		addVertex(&firstVertex, "C", &firstGraphVertices);
-		addVertex(&firstVertex, "D", &firstGraphVertices);
-		addVertex(&firstVertex, "E", &firstGraphVertices);
+		// addVertex(&firstVertex, "A", &firstGraphVertices);
+		// addVertex(&firstVertex, "B", &firstGraphVertices);
+		// addVertex(&firstVertex, "C", &firstGraphVertices);
+		// addVertex(&firstVertex, "D", &firstGraphVertices);
+		// addVertex(&firstVertex, "E", &firstGraphVertices);
+  //
+		// addEdge(firstVertex, "A", "B", 1, 0);
+		// addEdge(firstVertex, "A", "C", 1, 0);
+		// addEdge(firstVertex, "B", "C", 1, 0);
+		// addEdge(firstVertex, "B", "D", 1, 0);
+		// addEdge(firstVertex, "C", "D", 1, 0);
+		// addEdge(firstVertex, "D", "E", 1, 0);
+  //
+		// coloringAlg(firstVertex, &firstGraphVertices);
+  //
+		// printf("\n\n\nSECOND\n\n");
+  //
+		// addVertex(&secondVertex, "A", &secondGraphVertices);
+		// addVertex(&secondVertex, "B", &secondGraphVertices);
+		// addVertex(&secondVertex, "C", &secondGraphVertices);
+		// addVertex(&secondVertex, "D", &secondGraphVertices);
+		// addVertex(&secondVertex, "E", &secondGraphVertices);
+  //
+		// addEdge(secondVertex, "A", "B", 1, 0);
+		// addEdge(secondVertex, "A", "C", 1, 0);
+		// addEdge(secondVertex, "B", "C", 1, 0);
+		// addEdge(secondVertex, "B", "E", 1, 0);
+		// addEdge(secondVertex, "C", "E", 1, 0);
+		// addEdge(secondVertex, "E", "D", 1, 0);
 
-		addEdge(firstVertex, "A", "B", 1, 0);
-		addEdge(firstVertex, "A", "C", 1, 0);
-		addEdge(firstVertex, "B", "C", 1, 0);
-		addEdge(firstVertex, "B", "D", 1, 0);
-		addEdge(firstVertex, "C", "D", 1, 0);
-		addEdge(firstVertex, "D", "E", 1, 0);
-
-		coloringAlg(firstVertex, &firstGraphVertices);
-
-		printf("\n\n\nSECOND\n\n");
-
-		addVertex(&secondVertex, "A", &secondGraphVertices);
-		addVertex(&secondVertex, "B", &secondGraphVertices);
-		addVertex(&secondVertex, "C", &secondGraphVertices);
-		addVertex(&secondVertex, "D", &secondGraphVertices);
-		addVertex(&secondVertex, "E", &secondGraphVertices);
-
-		addEdge(secondVertex, "A", "B", 1, 0);
-		addEdge(secondVertex, "A", "C", 1, 0);
-		addEdge(secondVertex, "B", "C", 1, 0);
-		addEdge(secondVertex, "B", "E", 1, 0);
-		addEdge(secondVertex, "C", "E", 1, 0);
-		addEdge(secondVertex, "E", "D", 1, 0);
-
-		coloringAlg(secondVertex, &secondGraphVertices);
+		// coloringAlg(secondVertex, &secondGraphVertices);
 
 		instrucciones();
 		printf("\nOpción -> ");
@@ -758,6 +756,12 @@ int main(void) {
 				nombre[strcspn(nombre, "\n")] = 0;
 
 				dijkstraAlg(firstVertex, nombre, &firstGraphVertices);
+
+				break;
+			case 11:
+				printf("\n*** Colorear grafo ***\n");
+
+				coloringAlg(firstVertex, &firstGraphVertices);
 
 				break;
 		}
