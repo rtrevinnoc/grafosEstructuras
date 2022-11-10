@@ -478,63 +478,49 @@ void dijkstraAlg(tVertex *currVertex, char *pivot, int *numVertices) {
 	printf("\n");
 }
 
-// Imprimir representacion ASCII del grafo
+// Colorear grafo
 void coloringAlg(tVertex *currVertex, int *numVertices) {
-	int selected[*numVertices], available[*numVertices]; // Lista de vertices visitados
+	int colors[*numVertices], used[*numVertices];
 	char nombres[*numVertices][50];
-	// printf("%d", *numVertices);
-	selected[currVertex->id] = 0;
+	
+	colors[currVertex->id] = 0; // asignar el primer color al primer vertice
 	strcpy(nombres[currVertex->id], currVertex->name);
 
 	for (int i = (currVertex->id - 1); i >= 0; i--) {
-		// printf("-> %d\n", i);
-		selected[i] = -1; // agregar un espacio por cada vertice en el grafo
+		colors[i] = -1; // inicializar el resto como no asignados
 	}
 
-	// for(int x = 0; x < *numVertices; x++) {
-	// 	printf("%d ", selected[x]);
-	// }
-	// printf("\n");
-
-	memset(available, 0, sizeof(available)); // marcar todos los vertices como no visitados
-
-	// for(int x = 0; x < *numVertices; x++) {
-	// 	printf("%d ", available[x]);
-	// }
-	// printf("\n");
+	memset(used, 0, sizeof(used)); // asignar todos los colores como no usados
 	
 	tVertex *tmpVertex = currVertex->next; // Comenzar en el segundo vertice
-	// printf("%d", tmpVertex->id);
 	while (tmpVertex != NULL) { // Recorrer lista de vertices
 		tEdge *firstEdge = tmpVertex->firstEdge; // Comenzar en la primer arista
 		strcpy(nombres[tmpVertex->id], tmpVertex->name);
-		// printf("%s, ", tmpVertex->name);
-		// printf("\n");
 
 		tEdge *currEdge = firstEdge; // Comenzar en la primer arista
 		if (currEdge != NULL) { // Si hay aristas
 			while (currEdge != NULL) { // Recorrer lista de aristas
-				// printf("%s, ", currEdge->name);
-				if (selected[currEdge->id] != -1) {
-					available[selected[currEdge->id]] = 1;
+				if (colors[currEdge->id] != -1) { // si ese vertice tiene un color asginado
+					used[colors[currEdge->id]] = 1; // marcar su color como usado
 				}
 
 				currEdge = currEdge->next; // Pasar a la siguiente arista
 			}
 		}
 
-		int cr;
-		for (cr = 0; cr < *numVertices; cr++) {
-			if (available[cr] == 0) break;
+		int available;
+		for (available = 0; available < *numVertices; available++) {
+			if (used[available] == 0) break; // seleccionar el primer color disponible
 		}
 
-		selected[tmpVertex->id] = cr;
+		colors[tmpVertex->id] = available;
 
+		// reiniciar lista de colores usados
 		currEdge = firstEdge;
 		if (currEdge != NULL) { // Si hay aristas
 			while (currEdge != NULL) { // Recorrer lista de aristas
-				if (selected[currEdge->id] != -1) {
-					available[selected[currEdge->id]] = 0;
+				if (colors[currEdge->id] != -1) { // si el vertice no tiene color asignado
+					used[colors[currEdge->id]] = 0; // marcar su color como no usado
 				}
 
 				currEdge = currEdge->next; // Pasar a la siguiente arista
@@ -545,7 +531,7 @@ void coloringAlg(tVertex *currVertex, int *numVertices) {
 	}
 
 	for (int i = 0; i < *numVertices; i++) { // por cada vertice
-		printf("Vertice [%s](%d) - color %d\n", nombres[i], i, selected[i]); // Imprimir la leyenda que relaciona su indice con su nombre legible a humanos (el campo name)
+		printf("Vertice [%s](%d) - color %d\n", nombres[i], i, colors[i]); // Imprimir la leyenda que relaciona su indice con su nombre legible a humanos (el campo name)
 	}
 }
 
@@ -595,18 +581,19 @@ void getNumero(int entero, void *input) {
 void instrucciones() {
 	printf("\n\t\t ### GRAFOS ### \n");
 	printf("\n\t\t\t ¿Qué opcion desea? :\n"
-			"   \t\t 1 insertar vertice\n"
-			"   \t\t 2 conectar vertices\n"
-			"   \t\t 3 eliminar vertice\n"
-			"   \t\t 4 eliminar conexion\n"
-			"   \t\t 5 imprimir grafo\n"
-			"   \t\t 6 ejecutar algoritmo de Prim\n"
+			"   \t\t 1 insertar recuadro (vertice)\n"
+			"   \t\t 2 definir colindancia de recuadros (arista)\n"
+			"   \t\t 3 eliminar recuadro (vertice)\n"
+			"   \t\t 4 eliminar colindancia (conexion)\n"
+			"   \t\t 5 imprimir mapa (grafo)\n"
+      "   \t\t 6 colorear mapa (grafo)\n"
+			"   \t\t 0 salir\n");
+  /*			"   \t\t 6 ejecutar algoritmo de Prim\n"
 			"   \t\t 7 ejecutar algoritmo de Kruskal\n"
 			"   \t\t 8 Busqueda por profundidad\n"
 			"   \t\t 9 Busqueda por amplitud\n"
 			"   \t\t 10 Encontrar caminos mas cortos\n"
-			"   \t\t 11 Colorear grafo\n"
-			"   \t\t 0 salir\n");
+			"   \t\t 11 Colorear grafo\n"*/
 }
 
 int main(void) {
@@ -657,7 +644,7 @@ int main(void) {
 		getNumero(1, &op);
 		switch (op) {
 			case 1:
-				printf("\n*** Inserta un vertice ***\n");
+				printf("\n*** Inserta un recuadro (vertice) ***\n");
 
 				printf("Nombre -> ");
 				fgets(nombre, 50, stdin);
@@ -666,25 +653,25 @@ int main(void) {
 				addVertex(&firstVertex, nombre, &firstGraphVertices);
 				break;
 			case 2:
-				printf("\n*** Conecta dos vertices ***\n");
+				printf("\n*** Define colindancia entre dos recuadros (arista) ***\n");
 
-				printf("Nombre del primer nodo -> ");
+				printf("Nombre del recuadro (vertice) -> ");
 				fgets(nombre, 50, stdin);
 				nombre[strcspn(nombre, "\n")] = 0;
 
-				printf("Nombre del segundo nodo -> ");
+				printf("Nombre del recuadro con el que colinda (vertice) -> ");
 				fgets(nombre_b, 50, stdin);
 				nombre_b[strcspn(nombre_b, "\n")] = 0;
 
-				printf("Inserte peso del enlace -> ");
-				getNumero(1, &peso);
+				// printf("Inserte peso del enlace -> ");
+				// getNumero(1, &peso);
 
-				addEdge(firstVertex, nombre, nombre_b, peso, 0);
+				addEdge(firstVertex, nombre, nombre_b, 1, 0);
 				break;
 			case 3:
-				printf("\n*** Elimina un vertice ***\n");
+				printf("\n*** Elimina un recuadro (vertice) ***\n");
 
-				printf("Nombre del primer nodo -> ");
+				printf("Nombre del recuadro (vertice) -> ");
 				fgets(nombre, 50, stdin);
 				nombre[strcspn(nombre, "\n")] = 0;
 
@@ -692,13 +679,13 @@ int main(void) {
 
 				break;
 			case 4:
-				printf("\n*** Elimina conexion ***\n");
+				printf("\n*** Elimina colindancia (arista) ***\n");
 
-				printf("Nombre del primer nodo -> ");
+				printf("Nombre del recuadro (vertice) -> ");
 				fgets(nombre, 50, stdin);
 				nombre[strcspn(nombre, "\n")] = 0;
 
-				printf("Nombre del segundo nodo -> ");
+				printf("Nombre del recuadro con el que colinda (vertice) -> ");
 				fgets(nombre_b, 50, stdin);
 				nombre_b[strcspn(nombre_b, "\n")] = 0;
 
@@ -706,13 +693,13 @@ int main(void) {
 
 				break;
 			case 5:
-				printf("\n*** Imprime grafo ***\n");
+				printf("\n*** Imprime mapa (grafo) ***\n");
 
 				dumpDetails(firstVertex);
 				printGraph(firstVertex, &firstGraphVertices);
 
 				break;
-			case 6:
+			/*case 6:
 				printf("\n*** Ejecutar algoritmo de Prim ***\n");
 				primAlg (firstVertex, &minGraph, &firstGraphVertices);
 				dumpDetails(minGraph);
@@ -757,9 +744,9 @@ int main(void) {
 
 				dijkstraAlg(firstVertex, nombre, &firstGraphVertices);
 
-				break;
-			case 11:
-				printf("\n*** Colorear grafo ***\n");
+				break;*/
+			case 6:
+				printf("\n*** Colorear mapa (grafo) ***\n");
 
 				coloringAlg(firstVertex, &firstGraphVertices);
 
